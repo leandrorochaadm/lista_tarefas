@@ -18,9 +18,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final _toDoController = TextEditingController();
-  List _toDoList = [
-//    {"title": "abcdefg", "ok": true}
-  ];
+  List _toDoList = [];
+  Map<String, dynamic> _lastRemove;
+  int _lastRemovePos;
 
   void _addToDo() {
     setState(() {
@@ -114,21 +114,30 @@ class _HomeState extends State<Home> {
           });
         },
       ),
-    );
-
-    /*CheckboxListTile(
-      title: Text(_toDoList[index]["title"]),
-      value: _toDoList[index]["ok"],
-      secondary: CircleAvatar(
-        child: Icon(_toDoList[index]["ok"] ? Icons.check : Icons.error),
-      ),
-      onChanged: (c) {
+      onDismissed: (direction) {
         setState(() {
-          _toDoList[index]["ok"] = c;
+          _lastRemove = Map.from(_toDoList[index]);
+          _lastRemovePos = index;
+          _toDoList.removeAt(index);
+
           _saveData();
+
+          final snack = SnackBar(
+            content: Text("Tarefa \"${_lastRemove["title"]}\" removida!"),
+            action: SnackBarAction(
+                label: "Desfazer",
+                onPressed: () {
+                  setState(() {
+                    _toDoList.insert(_lastRemovePos, _lastRemove);
+                    _saveData();
+                  });
+                }),
+            duration: Duration(seconds: 2),
+          );
+          Scaffold.of(context).showSnackBar(snack);
         });
       },
-    );*/
+    );
   }
 
   Future<File> _getFile() async {
